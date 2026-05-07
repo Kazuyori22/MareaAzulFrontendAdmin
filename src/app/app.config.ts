@@ -24,6 +24,8 @@ import { HabitacionEstadoRepository } from "./domain/interfaces/habitacion-estad
 import { HabitacionRemoteRepository } from "./infrastructure/repositories/habitacion-remote.repository";
 import { AuthRepository } from './domain/interfaces/auth.repository';
 import { AuthRemoteRepository } from './infrastructure/repositories/auth-remote.repository';
+import { HotelRemoteRepository } from "./infrastructure/repositories/hotel-remote.repository";
+import { FacilidadRemoteRepository } from "./infrastructure/repositories/facilidad-remote.repository";
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -43,7 +45,7 @@ export const appConfig: ApplicationConfig = {
     },
     {
       provide: HotelRepository,
-      useClass: HotelTestRepository,
+      useClass: HotelRemoteRepository,
     },
     {
       provide: FacilidadRepository,
@@ -81,5 +83,9 @@ export const appConfig: ApplicationConfig = {
       provide: HabitacionEstadoRepository,
       useClass: HabitacionRemoteRepository,
     },
+    {
+      provide: FacilidadRepository,
+      useClass: FacilidadRemoteRepository
+    }
   ],
 };

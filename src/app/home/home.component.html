@@ -26,7 +26,7 @@
 <section
   id="home"
   class="hero-section"
-  [style.background-image]="'url(' + hotel?.hotelImgUrl + ')'"
+  [style.background-image]="'url(' + hotel?.homeImgUrl + ')'"
   style="background-size: cover; background-position: center;"
 >
   <div class="container">
@@ -150,9 +150,9 @@
       <div class="col-lg-4 col-sm-6" *ngFor="let facilidad of facilidades">
         <div class="service-item">
           <img
-            [src]="facilidad.imgUrl"
-            [alt]="facilidad.nombre"
-            class="facilidad-img"
+              [src]="facilidad.imageUrl"
+              [alt]="facilidad.nombre"
+              class="facilidad-img"
           >
           <h4>{{ facilidad.nombre }}</h4>
           <p>{{ facilidad.descripcion }}</p>
