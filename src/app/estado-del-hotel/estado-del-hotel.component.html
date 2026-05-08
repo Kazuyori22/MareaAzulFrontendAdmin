@@ -70,7 +70,7 @@
       <tr *ngFor="let h of resultadosDisponibilidad">
         <td>{{ h.habitacionId }}</td>
         <td>{{ h.tipoHabitacion }}</td>
-        <td>{{ h.costoTotal | currency:'CRC' }}</td>
+        <td>{{ h.costoTotal | currency:'$' }}</td>
         <td>
           <span [ngClass]="h.disponible ? 'estado disponible' : 'estado ocupada'">
             {{ h.disponible ? 'Disponible' : 'Ocupada' }}
