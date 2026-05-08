@@ -3,10 +3,12 @@ import { NgIf } from '@angular/common';
 import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { ApiService, TestResponse } from './infrastructure/services/api.service';
+import { AlertComponent } from './shared/alerts/alert/alert.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, NgIf],
+  standalone: true,
+  imports: [RouterOutlet, RouterLink, NgIf, AlertComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

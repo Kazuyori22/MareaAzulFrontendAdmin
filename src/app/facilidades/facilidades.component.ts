@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Facilidad } from '../domain/entities/facilidad.entity';
 import { FacilidadUseCase } from '../application/facilidades.use-case';
 import { UploadService } from '../infrastructure/services/upload.service';
+import { AlertService } from '../shared/alerts/alert/alert.service';
 
 @Component({
   selector: 'app-facilidades',
@@ -15,6 +16,7 @@ import { UploadService } from '../infrastructure/services/upload.service';
 export class FacilidadesComponent implements OnInit {
   private readonly facilidadUseCase = inject(FacilidadUseCase);
   private readonly uploadService = inject(UploadService);
+  private readonly alertService = inject(AlertService);
 
   facilidades: Facilidad[] = [];
   facilidadesVisibles: Facilidad[] = [];
@@ -32,6 +34,7 @@ export class FacilidadesComponent implements OnInit {
   selectedFile?: File;
 
   ngOnInit(): void {
+    this.alertService.success('Prueba de alerta global');
     this.cargarFacilidades();
   }
 
@@ -52,7 +55,7 @@ export class FacilidadesComponent implements OnInit {
       },
       error: (err: unknown) => {
         console.error(err);
-        this.mensajeError = 'Error al cargar facilidades.';
+        this.alertService.error('Error al cargar facilidades.');
       }
     });
   }
@@ -115,45 +118,45 @@ export class FacilidadesComponent implements OnInit {
     this.mensajeError = '';
     this.mensajeExito = '';
 
+    if (!this.facilidadForm.imageUrl.trim()) {
+      this.alertService.warning('La imagen es obligatoria.');
+      return;
+    }
+
     if (!this.facilidadForm.nombre.trim()) {
-      this.mensajeError = 'El nombre es obligatorio.';
+      this.alertService.warning('El nombre es obligatorio.');
       return;
     }
 
     if (!this.facilidadForm.descripcion.trim()) {
-      this.mensajeError = 'La descripción es obligatoria.';
-      return;
-    }
-
-    if (!this.facilidadForm.imageUrl.trim()) {
-      this.mensajeError = 'La imagen es obligatoria.';
+      this.alertService.warning('La descripción es obligatoria.');
       return;
     }
 
     if (this.modoEdicion) {
       this.facilidadUseCase.actualizar(this.facilidadForm.id, this.facilidadForm).subscribe({
         next: (resp) => {
-          this.mensajeExito = resp?.mensaje || 'Facilidad actualizada correctamente.';
+          this.alertService.success(resp?.mensaje || 'Facilidad actualizada correctamente.');
           this.cargarFacilidades();
           this.mostrarModal = false;
           this.facilidadForm = this.getFacilidadVacia();
         },
         error: (err: any) => {
           console.error(err);
-          this.mensajeError = err?.error?.mensaje || 'Error al actualizar facilidad.';
+          this.alertService.error(err?.error?.mensaje || 'Error al actualizar facilidad.');
         }
       });
     } else {
       this.facilidadUseCase.crear(this.facilidadForm).subscribe({
         next: () => {
-          this.mensajeExito = 'Facilidad agregada correctamente.';
+          this.alertService.success('Facilidad agregada correctamente.');
           this.cargarFacilidades();
           this.mostrarModal = false;
           this.facilidadForm = this.getFacilidadVacia();
         },
         error: (err: any) => {
           console.error(err);
-          this.mensajeError = err?.error?.mensaje || 'Error al crear facilidad.';
+          this.alertService.error(err?.error?.mensaje || 'Error al crear facilidad.');
         }
       });
     }
@@ -167,7 +170,7 @@ export class FacilidadesComponent implements OnInit {
 
     this.facilidadUseCase.eliminar(id).subscribe({
       next: (resp) => {
-        this.mensajeExito = resp?.mensaje || 'Facilidad eliminada correctamente.';
+        this.alertService.success(resp?.mensaje || 'Facilidad eliminada correctamente.');
         this.cargarFacilidades();
 
         const maxPage = Math.ceil(Math.max(this.facilidades.length - 1, 1) / this.itemsPerPage) - 1;
@@ -178,7 +181,7 @@ export class FacilidadesComponent implements OnInit {
       },
       error: (err: any) => {
         console.error(err);
-        this.mensajeError = err?.error?.mensaje || 'Error al eliminar facilidad.';
+        this.alertService.error(err?.error?.mensaje || 'Error al eliminar facilidad.');
       }
     });
   }
@@ -197,7 +200,7 @@ export class FacilidadesComponent implements OnInit {
       },
       error: (err: unknown) => {
         console.error(err);
-        this.mensajeError = 'Error al subir la imagen.';
+        this.alertService.error('Error al subir la imagen.');
       }
     });
   }
