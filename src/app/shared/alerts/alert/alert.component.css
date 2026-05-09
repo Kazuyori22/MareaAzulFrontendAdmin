@@ -19,7 +19,7 @@
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.18);
 
-  animation: slideIn 1s ease;
+  animation: slideIn 0.25s ease;
 
   font-family: Georgia, 'Times New Roman', serif;
 }
