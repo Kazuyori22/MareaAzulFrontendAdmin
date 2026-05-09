@@ -12,7 +12,7 @@ export class AlertService {
 
     setTimeout(() => {
       this.clear();
-    }, 3500);
+    }, 10000);
   }
 
   success(message: string, title = 'Operación exitosa'): void {
