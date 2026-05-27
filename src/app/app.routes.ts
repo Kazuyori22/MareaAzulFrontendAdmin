@@ -30,7 +30,7 @@ export const routes: Routes = [
   { path: 'ofertas', component: OfertasComponent, canActivate: [authGuard] },
   { path: 'publicidad', component: PublicidadComponent, canActivate: [authGuard] },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-   { path: 'bitacora', component: BitacoraComponent, canActivate: [authGuard] },
+  { path: 'bitacora', component: BitacoraComponent, canActivate: [authGuard] },
 
   // Fallback
   { path: '**', redirectTo: 'inicio' }

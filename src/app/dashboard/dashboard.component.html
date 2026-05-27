@@ -7,14 +7,14 @@
       <p class="kpi-value">${{ metrics?.totalRecaudadoHistorico }}</p>
     </div>
     <div class="kpi-card">
-      <h3>Reservas Históricas</h3>
+      <h3>Número de Reservas</h3>
       <p class="kpi-value">{{ metrics?.totalReservasRealizadas }}</p>
     </div>
   </div>
 
   <div class="charts-grid">
     <div class="chart-card">
-      <h3>Historial de Ingresos Económicos</h3>
+      <h3>Historial de Ingresos </h3>
       <div class="chart-wrapper" *ngIf="lineChartData">
         <canvas baseChart 
                 [data]="lineChartData" 
@@ -39,5 +39,5 @@
 </div>
 
 <div *ngIf="cargando" class="loading-spinner">
-  <p>Cargando datos estratégicos del hotel...</p>
+  <p>Cargando datos del hotel...</p>
 </div>
