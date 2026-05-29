@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { ApiService, TestResponse } from './infrastructure/services/api.service';
 import { AlertComponent } from './shared/alerts/alert/alert.component';
@@ -9,13 +9,14 @@ import { ConfirmComponent } from './shared/confirm/confirm.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, AlertComponent, ConfirmComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, AlertComponent, ConfirmComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   title = 'MareaAzulAdmin';
   showHeader = true;
+  menuOpen = false;
 
   message = '';
 
@@ -24,7 +25,16 @@ export class AppComponent implements OnInit {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
         this.showHeader = this.router.url !== '/inicio';
+        this.menuOpen = false; // cierra el menú al navegar
       });
+  }
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  closeMenu() {
+    this.menuOpen = false;
   }
 
   ngOnInit(): void {

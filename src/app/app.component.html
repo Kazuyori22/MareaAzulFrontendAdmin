@@ -13,18 +13,29 @@
               <img src="/assets/img/logo.png" alt="">
             </a>
           </div>
-          <div class="nav-menu">
+
+          <!-- Botón hamburguesa (visible en pantallas medianas/pequeñas) -->
+          <button
+            class="nav-toggle"
+            [class.active]="menuOpen"
+            (click)="toggleMenu()"
+            aria-label="Abrir menú">
+            <span></span><span></span><span></span>
+          </button>
+
+          <div class="nav-menu" [class.open]="menuOpen">
             <nav class="mainmenu">
               <ul>
-                <li><a routerLink="/sitio">Sitio</a></li>
-                <li><a routerLink="/reservaciones">Reservaciones</a></li>
-                <li><a routerLink="/habitaciones">Habitaciones</a></li>
-                <li><a routerLink="/estado-hotel">Estado del Hotel</a></li>
-                <li><a routerLink="/temporadas">Temporadas</a></li>
-                <li><a routerLink="/ofertas">Ofertas</a></li>
-                <li><a routerLink="/publicidad">Publicidad</a></li>
-                <li><a routerLink="/bitacora">Bitácora</a></li>
+                <li><a routerLink="/sitio" routerLinkActive="active-link" (click)="closeMenu()">Sitio</a></li>
+                <li><a routerLink="/reservaciones" routerLinkActive="active-link" (click)="closeMenu()">Reservaciones</a></li>
+                <li><a routerLink="/habitaciones" routerLinkActive="active-link" (click)="closeMenu()">Habitaciones</a></li>
+                <li><a routerLink="/estado-hotel" routerLinkActive="active-link" (click)="closeMenu()">Estado del Hotel</a></li>
+                <li><a routerLink="/temporadas" routerLinkActive="active-link" (click)="closeMenu()">Temporadas</a></li>
+                <li><a routerLink="/ofertas" routerLinkActive="active-link" (click)="closeMenu()">Ofertas</a></li>
+                <li><a routerLink="/publicidad" routerLinkActive="active-link" (click)="closeMenu()">Publicidad</a></li>
+                <li><a routerLink="/bitacora" routerLinkActive="active-link" (click)="closeMenu()">Bitácoras del sistema</a></li>
                 <li><a routerLink="/dashboard">Dashboard</a></li>
+                <li><a routerLink="/prediccion" routerLinkActive="active-link" (click)="closeMenu()">Predicción IA</a></li>
               </ul>
             </nav>
             <div class="nav-right">
@@ -34,6 +45,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Fondo oscurecido al abrir el menú (solo móvil/laptop) -->
+    <div class="nav-overlay" [class.show]="menuOpen" (click)="closeMenu()"></div>
   </header>
 }
 
