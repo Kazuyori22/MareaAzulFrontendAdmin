@@ -1,0 +1,149 @@
+<!-- ── CARGANDO ──────────────────────────────────────────────────── -->
+<div *ngIf="cargando" class="estado-pantalla">
+  <div class="spinner"></div>
+  <p>Entrenando el modelo de predicción...</p>
+</div>
+
+<!-- ── ERROR ────────────────────────────────────────────────────── -->
+<div *ngIf="!cargando && error" class="estado-pantalla error">
+  <div class="icono-estado">⚠️</div>
+  <p>No se pudo conectar con el servidor. Verifica que el backend esté activo.</p>
+</div>
+
+<!-- ── CONTENIDO PRINCIPAL ──────────────────────────────────────── -->
+<div *ngIf="!cargando && !error && resultado" class="prediccion-container">
+
+  <!-- Encabezado -->
+  <div class="page-header">
+    <div class="header-texto">
+      <h1>Predicción de Reservas</h1>
+      <p class="subtitulo">
+        El modelo analiza el historial de reservas del hotel y proyecta
+        el comportamiento futuro usando inteligencia artificial (SSA).
+        Utiliza esta información para planificar promociones, personal y tarifas.
+      </p>
+    </div>
+    <div class="badge-modelo">
+      <span class="dot"></span>
+      Modelo activo · {{ resultado.mesesEntrenados }} meses de datos
+    </div>
+  </div>
+
+  <!-- Selector de horizonte -->
+  <div class="selector-card">
+    <span class="selector-label">¿Cuántos meses deseas predecir?</span>
+    <div class="selector-botones">
+      <button
+        *ngFor="let n of opcionesMeses"
+        [ngClass]="{ activo: mesesSeleccionados === n }"
+        (click)="cambiarMeses(n)">
+        {{ n }} meses
+      </button>
+    </div>
+  </div>
+
+  <!-- Sin datos suficientes -->
+  <div *ngIf="!resultado.predicciones.length" class="aviso-card">
+    <span>📊</span>
+    <p>{{ resultado.mensaje }}</p>
+  </div>
+
+  <!-- KPIs -->
+  <div *ngIf="resultado.predicciones.length" class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icono">📈</div>
+      <p class="kpi-label">Mes más activo</p>
+      <p class="kpi-valor dorado">{{ formatearPeriodo(mesMasAlto!.periodo) }}</p>
+      <p class="kpi-sub">~{{ mesMasAlto!.reservasPredichas | number:'1.0-0' }} reservas estimadas</p>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icono">📉</div>
+      <p class="kpi-label">Mes más bajo</p>
+      <p class="kpi-valor oscuro">{{ formatearPeriodo(mesMasBajo!.periodo) }}</p>
+      <p class="kpi-sub">~{{ mesMasBajo!.reservasPredichas | number:'1.0-0' }} reservas estimadas</p>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icono">💰</div>
+      <p class="kpi-label">Ingresos estimados</p>
+      <p class="kpi-valor dorado">{{ totalIngresosEstimados | currency:'USD':'symbol':'1.0-0' }}</p>
+      <p class="kpi-sub">próximos {{ mesesSeleccionados }} meses</p>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icono">📊</div>
+      <p class="kpi-label">Promedio mensual</p>
+      <p class="kpi-valor oscuro">~{{ promedioReservas | number:'1.0-0' }}</p>
+      <p class="kpi-sub">reservas por mes</p>
+    </div>
+  </div>
+
+  <!-- Gráfico principal -->
+  <div *ngIf="resultado.predicciones.length" class="chart-card">
+    <div class="chart-header">
+      <h3>Reservas históricas vs. predicción</h3>
+      <div class="leyenda-extra">
+        <span class="leyenda-item historico">— Histórico</span>
+        <span class="leyenda-item prediccion">- - Predicción</span>
+        <span class="leyenda-item banda">▓ Intervalo 95%</span>
+      </div>
+    </div>
+    <div class="chart-wrapper">
+      <canvas baseChart
+              [data]="chartData!"
+              [options]="chartOptions"
+              type="line">
+      </canvas>
+    </div>
+  </div>
+
+  <!-- Tabla de predicciones -->
+  <div *ngIf="resultado.predicciones.length" class="tabla-card">
+    <h3>Detalle mensual de la predicción</h3>
+    <p class="tabla-nota">
+      La banda de confianza del 95% indica el rango probable. Cuanto más estrecha,
+      más certeza tiene el modelo.
+    </p>
+
+    <div class="tabla-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Período</th>
+            <th>Reservas estimadas</th>
+            <th>Margen</th>
+            <th>Ingresos estimados</th>
+            <th>Demanda esperada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of resultado.predicciones">
+            <td class="td-periodo">{{ formatearPeriodo(p.periodo) }}</td>
+            <td class="td-reservas">{{ p.reservasPredichas | number:'1.0-0' }}</td>
+            <td class="td-margen">{{ rangoReservas(p) }}</td>
+            <td class="td-ingresos">{{ p.ingresosPredichos | currency:'USD':'symbol':'1.0-0' }}</td>
+            <td>
+              <span class="badge" [ngClass]="nivelOcupacion(p.reservasPredichas)">
+                {{ nivelOcupacion(p.reservasPredichas) === 'alta' ? 'Alta' :
+                   nivelOcupacion(p.reservasPredichas) === 'media' ? 'Media' : 'Baja' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pie de página informativo -->
+  <div class="info-footer">
+    <p>
+<strong>¿Cómo funciona el modelo?</strong>
+      SSA (Singular Spectrum Analysis) descompone el historial en tendencia, estacionalidad
+      y ruido, luego proyecta cada componente hacia el futuro. El intervalo de confianza del 95%
+      indica el rango en que probablemente caerá el valor real.
+    </p>
+    <p class="mensaje-modelo">{{ resultado.mensaje }}</p>
+  </div>
+
+</div>

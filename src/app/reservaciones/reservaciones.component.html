@@ -1,3 +1,155 @@
-<div class="page">
-  <h1>Reservaciones</h1>
+<div class="reservas">
+
+  <!-- Encabezado -->
+  <div class="rsv-header">
+    <div class="rsv-header-texto">
+      <h1>Reservaciones</h1>
+      <p class="subtitulo">
+        Reservas de hoy y próximos días. Cancela una reserva cuando el cliente
+        lo solicite por teléfono o correo.
+      </p>
+    </div>
+    <button class="btn-refrescar" (click)="cargar()" [disabled]="cargando">
+      ↻ Actualizar
+    </button>
+  </div>
+
+  <!-- Cargando -->
+  <div *ngIf="cargando" class="estado-pantalla">
+    <div class="spinner"></div>
+    <p>Cargando reservas...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!cargando && error" class="estado-pantalla error">
+    <div class="icono">⚠️</div>
+    <p>No se pudieron cargar las reservas. Verifica que el backend esté activo.</p>
+    <button class="btn-refrescar" (click)="cargar()">Reintentar</button>
+  </div>
+
+  <!-- Contenido -->
+  <div *ngIf="!cargando && !error">
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <span class="kpi-num">{{ totalVigentes }}</span>
+        <span class="kpi-lbl">Reservas vigentes</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-num dorado">{{ totalHoy }}</span>
+        <span class="kpi-lbl">Llegan hoy</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-num">{{ totalEnHotel }}</span>
+        <span class="kpi-lbl">En el hotel</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-num">{{ ingresosEsperados | currency:'USD':'symbol':'1.0-0' }}</span>
+        <span class="kpi-lbl">Ingresos esperados</span>
+      </div>
+    </div>
+
+    <!-- Buscador -->
+    <div class="buscador">
+      <span class="lupa">🔍</span>
+      <input
+        type="text"
+        [(ngModel)]="busqueda"
+        placeholder="Buscar por cliente, número de reserva, cédula o habitación..." />
+    </div>
+
+    <!-- Sin reservas en absoluto -->
+    <div *ngIf="totalVigentes === 0" class="vacio">
+      <div class="icono">📭</div>
+      <p>No hay reservas vigentes para hoy ni próximos días.</p>
+    </div>
+
+    <!-- Sin resultados de búsqueda -->
+    <div *ngIf="totalVigentes > 0 && !hayResultados" class="vacio">
+      <div class="icono">🔍</div>
+      <p>No se encontraron reservas que coincidan con "{{ busqueda }}".</p>
+    </div>
+
+    <!-- En el hotel -->
+    <section *ngIf="enHotel.length" class="seccion">
+      <h2 class="seccion-titulo">En el hotel <span class="conteo">{{ enHotel.length }}</span></h2>
+      <div class="cards">
+        <ng-container *ngFor="let r of enHotel; trackBy: trackById">
+          <ng-container *ngTemplateOutlet="card; context: { $implicit: r }"></ng-container>
+        </ng-container>
+      </div>
+    </section>
+
+    <!-- Llegan hoy -->
+    <section *ngIf="lleganHoy.length" class="seccion">
+      <h2 class="seccion-titulo">Llegan hoy <span class="conteo">{{ lleganHoy.length }}</span></h2>
+      <div class="cards">
+        <ng-container *ngFor="let r of lleganHoy; trackBy: trackById">
+          <ng-container *ngTemplateOutlet="card; context: { $implicit: r }"></ng-container>
+        </ng-container>
+      </div>
+    </section>
+
+    <!-- Próximos días -->
+    <section *ngIf="proximas.length" class="seccion">
+      <h2 class="seccion-titulo">Próximos días <span class="conteo">{{ proximas.length }}</span></h2>
+      <div class="cards">
+        <ng-container *ngFor="let r of proximas; trackBy: trackById">
+          <ng-container *ngTemplateOutlet="card; context: { $implicit: r }"></ng-container>
+        </ng-container>
+      </div>
+    </section>
+
+  </div>
 </div>
+
+<!-- ── Plantilla reutilizable de tarjeta ─────────────────────────── -->
+<ng-template #card let-r>
+  <article class="reserva-card">
+    <div class="card-top">
+      <span class="numero">{{ r.numeroReservacion }}</span>
+      <span class="badge-llegada" [ngClass]="claseLlegada(r)">{{ etiquetaLlegada(r) }}</span>
+    </div>
+
+    <h3 class="cliente">{{ r.cliente }}</h3>
+
+    <div class="contacto" *ngIf="r.email || r.cedula">
+      <span *ngIf="r.email" class="contacto-item">✉ {{ r.email }}</span>
+      <span *ngIf="r.cedula" class="contacto-item">🪪 {{ r.cedula }}</span>
+    </div>
+
+    <div class="datos">
+      <div class="dato">
+        <span class="dato-lbl">Llegada</span>
+        <span class="dato-val">{{ r.fechaLlegada | date:'dd MMM yyyy' }}</span>
+      </div>
+      <div class="dato">
+        <span class="dato-lbl">Salida</span>
+        <span class="dato-val">{{ r.fechaSalida | date:'dd MMM yyyy' }}</span>
+      </div>
+      <div class="dato">
+        <span class="dato-lbl">Noches</span>
+        <span class="dato-val">{{ noches(r) }}</span>
+      </div>
+      <div class="dato">
+        <span class="dato-lbl">Habitación(es)</span>
+        <span class="dato-val">{{ r.habitaciones }}</span>
+      </div>
+    </div>
+
+    <div class="card-bottom">
+      <div class="total">
+        <span class="total-lbl">Total</span>
+        <span class="total-val">{{ r.totalPagar | currency:'USD':'symbol':'1.2-2' }}</span>
+        <span class="badge-estado" [ngClass]="estadoClase(r.estado)">{{ r.estado }}</span>
+      </div>
+      <button
+        class="btn-cancelar"
+        (click)="cancelar(r)"
+        [disabled]="cancelandoId === r.idReserva">
+        {{ cancelandoId === r.idReserva ? 'Cancelando...' : 'Cancelar' }}
+      </button>
+    </div>
+  </article>
+</ng-template>
