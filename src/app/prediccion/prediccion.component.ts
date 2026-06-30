@@ -78,10 +78,17 @@ export class PrediccionComponent implements OnInit {
     this.useCase.execute(this.mesesSeleccionados).subscribe({
       next: (data) => {
         this.resultado = data;
-        this.calcularKpis(data.predicciones);
-        this.construirChart(data.historico, data.predicciones);
         this.cargando = false;
         this.error = false;
+
+        // Solo hay KPIs y gráfico si el backend devolvió predicciones
+        // (requiere >= 5 meses de histórico). Si no, el HTML muestra el aviso
+        // con resultado.mensaje. Construir el chart sin datos lanzaba RangeError
+        // (Array(-1)) y dejaba la pantalla cargando para siempre.
+        if (data.predicciones?.length) {
+          this.calcularKpis(data.predicciones);
+          this.construirChart(data.historico, data.predicciones);
+        }
       },
       error: () => {
         this.cargando = false;
@@ -99,6 +106,12 @@ export class PrediccionComponent implements OnInit {
   }
 
   private construirChart(historico: HistoricoMensual[], predicciones: PrediccionMensual[]): void {
+    // Sin histórico no hay gráfico que construir (evita Array(-1) -> RangeError).
+    if (!historico?.length || !predicciones?.length) {
+      this.chartData = undefined;
+      return;
+    }
+
     // Etiquetas: todos los meses (histórico + predicción)
     const labelsHistorico = historico.map(h => this.etiquetaMes(h.anio, h.mes));
     const labelsPrediccion = predicciones.map(p => this.formatearPeriodo(p.periodo));
